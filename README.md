@@ -41,3 +41,17 @@ if err != nil {
     return err
 }
 ```
+
+## How does it work?
+This library uses expiring keys, lists, and sets to keep track of timers. The following Redis commands are used in the following situations:
+
+### Creating a timer
+When a timer is created, a new expiring key is added at the path `timers:<namespace>:timer:<key>` and the timer is registered using a set data structure at the path `timers:<namespace>:registered`. This is necessary because the first key will eventually expire, and we need to know that the timer existed in the first place after it expires.
+
+### Polling the timers
+Whenever you poll the timers, we find take all the timers that have not yet expired by scanning the prefix `timers:<namespace>:timer:` and add them to a temporary set `timers:<namespace>:_registered_<random number>`. We then perform a `SDIFF` command between this temporary set and the original `timers:<namespace>:registered` set.
+
+Any timers that are in the registered set, but were not in the temporary set must have expired, so we add the keys of those timers to a list `timers:<namespace>:queue`.
+
+### Waiting for the timers
+Whenever you call `.Next(...)` to wait for the next timer to fire, you're just performing a `BRPOP` command against the `timers:<namespace>:queue` list.
