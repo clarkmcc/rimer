@@ -1,4 +1,6 @@
 # rimer
+[![.github/workflows/test.yml](https://github.com/clarkmcc/rimer/actions/workflows/test.yml/badge.svg)](https://github.com/clarkmcc/rimer/actions/workflows/test.yml)
+
 Redis-backed event timers. Redis does not provide a native way of scheduling events to be fired at some time in the future, and manually building something using the data structures that Redis does provide is tedious. This library aims to provide a simple polling-based distributed solution to this problem.
 
 ## Features
